@@ -24,25 +24,15 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ziyatovzafar98@gmail.com
-    password: pdsd bojp pnpq dmjn
+    username: gmail-username@gmail.com
+    password: gmail app password
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
-#  mail:
-#    host: smtp.gmail.com
-#    port: 587
-#    username: mavlonovbaxtiyor1983@gmail.com
-#    password: zigd hcyp infw vned
-#    properties:
-#      mail:
-#        smtp:
-#          auth: true
-#          starttls:
-#            enable: true
+
 server:
   port: 8080
   # servlet:

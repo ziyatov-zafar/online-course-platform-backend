@@ -7,7 +7,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class LoginForm {
-  private String username;
-  private String password;
+public class ChangePasswordForm {
+    private String oldPassword;
+    private String newPassword;
 }

@@ -109,6 +109,25 @@ public interface UserRepository extends JpaRepository<User, Long> {
                   c.courseCount
               FROM userCount u, teacherCount t, studentCount s, courseCount c""")
     StatisticDto getStatistics();
+    @Query("""
+    SELECT u FROM User u
+    WHERE (
+        LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) OR
+        LOWER(u.firstname) LIKE LOWER(CONCAT('%', :query, '%')) OR
+        LOWER(u.lastname) LIKE LOWER(CONCAT('%', :query, '%')) OR
+        LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%'))
+    )
+    AND u.verified = true
+""")
+    List<User> searchByUsernameAndFirstNameAndLastnameAndEmail(@Param("query") String query);
 
+    @Query("""
+                SELECT u FROM User u
+                WHERE (
+                    LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%'))
+                )
+                AND u.verified = true
+            """)
+    List<User> searchByUsername(@Param("query") String query);
 
 }

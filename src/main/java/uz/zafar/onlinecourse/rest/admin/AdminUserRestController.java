@@ -7,8 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.zafar.onlinecourse.db.domain.Grade;
 import uz.zafar.onlinecourse.db.domain.Teacher;
+import uz.zafar.onlinecourse.dto.ResponseDto;
 import uz.zafar.onlinecourse.dto.user_dto.req.SignUpForm;
+import uz.zafar.onlinecourse.dto.user_dto.res.UserDto;
 import uz.zafar.onlinecourse.service.UserService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("api/admin/user")
@@ -50,5 +54,19 @@ public class AdminUserRestController {
     @PostMapping("add-teacher")
     public ResponseEntity<?> addTeacher(@RequestBody SignUpForm form) {
         return ResponseEntity.ok(userService.addTeacher(form));
+    }
+    @GetMapping("find-by-username")
+    public ResponseDto<?> findByUsername(@RequestParam String username) {
+        return userService.findByUsername(username);
+    }
+
+    @GetMapping("search-by-username")
+    public ResponseDto<List<UserDto>> searchByUsername(@RequestParam String query) {
+        return userService.searchByUsername(query);
+    }
+
+    @GetMapping("search-by-username-and-firstname-and-lastname-and-email")
+    public ResponseDto<List<UserDto>> searchByUsernameAndFirstnameAndLastnameAndEmail(@RequestParam String query) {
+        return userService.searchByUsernameAndFirstNameAndLastnameAndEmail(query);
     }
 }

@@ -13,6 +13,7 @@ import uz.zafar.onlinecourse.db.repository.StudentRepository;
 import uz.zafar.onlinecourse.db.repository.TeacherRepository;
 import uz.zafar.onlinecourse.db.repository.UserRepository;
 import uz.zafar.onlinecourse.dto.*;
+import uz.zafar.onlinecourse.dto.form.ChangePasswordForm;
 import uz.zafar.onlinecourse.dto.form.LoginForm;
 import uz.zafar.onlinecourse.dto.student_dto.res.StudentDto;
 import uz.zafar.onlinecourse.dto.teacher_dto.res.TeacherDto;
@@ -279,8 +280,7 @@ public class UserServiceImpl implements UserService {
             user.setPassword(passwordEncoder.encode(form.getPassword()));
 //            user.setPhone(form.getPhone());
             List<Role> roles = new ArrayList<>();
-            Role role = roleRepository.findByName("ROLE_TEACHER")
-                    .orElseThrow(() -> new RuntimeException("ROLE_STUDENT topilmadi"));
+            Role role = roleRepository.findByName("ROLE_TEACHER").orElseThrow(() -> new RuntimeException("ROLE_STUDENT topilmadi"));
             roles.add(role);
             user.setRoles(new ArrayList<>(roles));
             user.setCreated(TimeUtil.currentTashkentTime());
@@ -298,7 +298,84 @@ public class UserServiceImpl implements UserService {
             return new ResponseDto<>(true, "Success", findByTeacherId(teacher.getId()).getData());
         } catch (Exception e) {
             log.error(e);
-            return new ResponseDto<>(false, e.getMessage(), null);
+            return new ResponseDto<>(false, e.getMessage());
         }
     }
+
+    @Override
+    public ResponseDto<?> changePassword(ChangePasswordForm form, Long userId) {
+        try {
+            Optional<User> uOp = userRepository.findById(userId);
+            if (uOp.isEmpty()) {
+                return new ResponseDto<>(false, "User not found", null);
+            }
+            User user = uOp.get();
+            if (!passwordEncoder.matches(form.getOldPassword(), user.getPassword())) {
+                return new ResponseDto<>(false, "Old password is incorrect", null);
+            }
+            user.setPassword(passwordEncoder.encode(form.getNewPassword()));
+            return new ResponseDto<>(true, "Password changed successfully", userRepository.save(user));
+        } catch (Exception e) {
+            log.error("Error while changing password", e);
+            return new ResponseDto<>(false, "Something went wrong", null);
+        }
+    }
+
+
+    @Override
+    public ResponseDto<UserDto> findByUsername(String username) {
+        try {
+            Optional<User> uOp = userRepository.findByUsername(username);
+            if (uOp.isEmpty()) {
+                return new ResponseDto<>(false, "User not found");
+            }
+            User user = uOp.get();
+            return new ResponseDto<>(
+                    true, user.isActive() ? "Success" : "User is blocked", mapToUserDto(user)
+            );
+        } catch (Exception e) {
+            log.error(e);
+            return new ResponseDto<>(false, e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseDto<List<UserDto>> searchByUsernameAndFirstNameAndLastnameAndEmail(String query) {
+        try {
+            List<UserDto> users = new ArrayList<>();
+            for (User user : userRepository.searchByUsernameAndFirstNameAndLastnameAndEmail(query)) {
+                users.add(mapToUserDto(user));
+            }
+            return new ResponseDto<>(true, users.isEmpty() ? "Users is empty" : "Success", users);
+        } catch (Exception e) {
+            log.error(e);
+            return new ResponseDto<>(false, e.getMessage());
+        }
+    }
+    private UserDto mapToUserDto(User user) {
+        return new UserDto(
+                user.getId(),
+                user.getFirstname(),
+                user.getLastname(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRoles().stream().map(Role::getName).toList(),
+                user.getCreated(),
+                user.getUpdated()
+        );
+    }
+    @Override
+    public ResponseDto<List<UserDto>> searchByUsername(String username) {
+        try {
+            List<UserDto> users = new ArrayList<>();
+            for (User user : userRepository.searchByUsername(username)) {
+                users.add(mapToUserDto(user));
+            }
+            return new ResponseDto<>(true, users.isEmpty() ? "Users is empty" : "Success", users);
+        } catch (Exception e) {
+            log.error(e);
+            return new ResponseDto<>(false, e.getMessage());
+        }
+    }
+
 }
